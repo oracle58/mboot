@@ -1,17 +1,39 @@
 # mboot
+
 Minimal Bootloader for the minos kernel.
 
 ## Compile
+
 ```shell
 nasm -f bin boot.asm -o boot.bin
 ```
 
 ## Run
+
 ```shell
 qemu-system-x86_64 -hda ./boot.bin
 ```
 
+### QMP
+
+```shell
+qemu-system-x86_64 \
+  -drive format=raw,file=boot.bin \
+  -S \
+  -qmp tcp:127.0.0.1:4444,server=on,wait=off \
+  -chardev socket,id=mon0,host=127.0.0.1,port=4445,server=on,wait=off \
+  -mon chardev=mon0,mode=control \
+  -nographic
+
+qemu-system-x86_64 \
+  -drive format=raw,file=boot.bin \
+  -S \
+  -qmp tcp:127.0.0.1:4444,server=on,wait=off \
+  -nographic
+```
+
 ## Notes
+
 Address      | Data
 -------------|-----------
 0x0000       | (Data segment, cleared)
@@ -21,9 +43,10 @@ Address      | Data
 0x7C1B       | 0x00 (end of message)
 0x7DFE - 0x7DFF | 0x55AA (boot signature at end of 512-byte sector)
 
-
 ## Resources
+
 [**BIOS Common Functions**](https://wiki.osdev.org/BIOS)
+
 * `INT 0x10, AH = 1` -- set up the cursor
 * `INT 0x10, AH = 3` -- cursor position
 * `INT 0x10, AH = 0xE` -- display char
