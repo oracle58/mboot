@@ -2,44 +2,62 @@
 
 Minimal Bootloader for the minos kernel.
 
-## Assemble Bootloader
+## Build
 
 ```bash
-make all
+make clean    # cleanup build and bin files
+make all      # build all
+
+make assemble # assemble bootloader
+make kernel   # build kernel
+make image    # build os image
 ```
 
-## Build Kernel
+## Emulate Bootloader/OS
 
 ```bash
-gcc -m32 -std=gnu11 -ffreestanding -O2 -c src/kernel.c -o build/kernel.o
-ld -m elf_i386 -T linker.ld build/kernel.o -o build/kernel.bin --nmagic
-```
+# gdb debug
+qemu-system-x86_64 -nographic -drive format=raw,file=./bin/os.bin -gdb tcp::1234 stdio -S
 
-## Emulate Bootloader
-
-```bash
 # no graphic
 qemu-system-x86_64 -nographic -drive format=raw,file=./bin/boot.bin
 qemu-system-x86_64 -nographic -drive format=raw,file=./bin/os.bin
-
-# legacy drive shorthand (uses default GUI)
-qemu-system-x86_64 -hda ./bin/boot.bin
 
 # curses display
 qemu-system-x86_64 -display curses -drive format=raw,file=./bin/boot.bin
 qemu-system-x86_64 -display curses -drive format=raw,file=./bin/os.bin
 ```
 
+## Debug
+```bash
+sudo pacman -Sy hexedit
+sudo pacman -Sy gdb
+
+add-symbol-file ./build/completeKernel.o 0x100000
+break kmain
+
+target remote localhost:1234
+```
+
 ## Boot Sector Memory Map
 
-Address      | Data
--------------|-----------
-0x0000       | (Data segment, cleared)
-0x7C00       | Stack and code loaded here
-0x7C06       | Pointer to 'Hello World!' message
-0x7C10       | 'Hello World!', 0 
-0x7C1B       | 0x00 (end of message)
-0x7DFE - 0x7DFF | 0x55AA (boot signature at end of 512-byte sector)when l
+Address         | Content
+--------------- | -------------------------------------------------------------
+`0x0000:0000`   | (Unused / BIOS data area)
+…               | …
+`0x0000:7C00`   | Start of bootloader (`start:`)
+`0x0000:7C00–7DFF` | 512 B boot sector:
+                 - `0x7C00–…` Real-mode setup & `start:`…`sti`  
+                 - `…–…` EDD loader (`int 13h AH=42h`)  
+                 - `…–…` GDT table (`gdt_start`…`gdt_end`)  
+                 - `…–…` GDT descriptor (`gdt_descriptor`)  
+                 - `0x0000:0x9000` → 16-byte disk-address packet  
+                 - padding up to offset 510  
+                 - `0xAA55` boot signature at offset 510
+                 
+`0x0010 0000`   | Start of kernel (`_start`/`PModeMain`); 8 sectors DMA-loaded here  
+…               | rest of `.text`, `.rodata`, `.data`, `.bss`
+
 
 ## Global Descriptor Table
 
@@ -98,3 +116,22 @@ Address      | Data
 * `INT 0x10, AX = 0x4F01` -- VESA get mode information call
 * `INT 0x10, AX = 0x4F02` -- select VESA video modes
 * `INT 0x10, AX = 0x4F0A` -- VESA 2.0 protected mode interface
+
+## Video mem
+
+```c
+    // VGA text buffer starts at 0xB8000
+    char *video_memory = (char *)0xB8000;
+
+    video_memory[0] = 'H';
+    video_memory[1] = 0x07; 
+
+    video_memory[2] = 'i';
+    video_memory[3] = 0x07;
+
+    video_memory[4] = '!';
+    video_memory[5] = 0x07;
+
+    video_memory[6] = ' ';
+    video_memory[7] = 0x07;
+```

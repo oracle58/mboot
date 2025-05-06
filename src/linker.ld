@@ -1,8 +1,8 @@
 ENTRY(_start)
 OUTPUT_FORMAT(binary)
-
-SECTIONS {
-    . = 0x00000;
+SECTIONS
+{
+    . = 0x0100000;
     .text : ALIGN(4096)
     {
         *(.text)
