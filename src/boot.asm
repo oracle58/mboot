@@ -25,7 +25,7 @@ done:
     hlt                ; Halt CPU Exec
 
 msg: 
-    dw 'Hello World!', 0   ; Message to print, null-terminated (0 at end)
+    dw 'Hello World!', 0  ; Message to print  
 
-times 510 - ($ - $$) db 0  ; Pad the file with 0s to make it 512 bytes
-dw 0xAA55                  ; Boot signature (magic number the BIOS requires)
+times 510 - ($ - $$) db 0      ; Pad the file with 0s to make it 512 bytes
+dw 0xAA55                      ; Boot signature (magic number the BIOS requires)

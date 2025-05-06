@@ -11,11 +11,14 @@ make all
 ## Emulate
 
 ```bash
-# legacy display
-qemu-system-x86_64 -hda ./boot.bin
+# no graphic
+qemu-system-x86_64 -nographic -drive format=raw,file=./bin/boot.bin
+
+# legacy drive shorthand (uses default GUI)
+qemu-system-x86_64 -hda ./bin/boot.bin
 
 # curses display
-qemu-system-x86_64 -display curses -drive format=raw,file=boot.bin
+qemu-system-x86_64 -display curses -drive format=raw,file=./bin/boot.bin
 ```
 
 

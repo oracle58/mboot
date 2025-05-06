@@ -1,5 +1,5 @@
 [BITS 16]              ; Assemble for 16-bit real mode (BIOS mode)
-[ORG 0x7c00]           ; Load at 0x7C00 (where BIOS loads bootloader)
+[ORG 0x7C00]           ; Load at 0x7C00 (where BIOS loads bootloader)
 
 start: 
     cli                ; Disable interrupts (prevents random interruptions while setting up)
@@ -7,7 +7,7 @@ start:
     mov ds, ax         ; Data segment to 0x0000
     mov es, ax         ; Extra segment to 0x0000
     mov ss, ax         ; Stack segment to 0x0000
-    mov sp, 0x7c00     ; Stack pointer at 0x7C00 (same as code load address, simple and safe)
+    mov sp, 0x7C00     ; Stack pointer at 0x7C00 (same as code load address, simple and safe)
     sti                ; Re-enable interrupts
 
     mov si, msg        ; Point SI (source index) to start of the message
@@ -25,7 +25,7 @@ done:
     hlt                ; Halt CPU Exec
 
 msg: 
-    dw 'Hello World!', 0   ; Message to print, null-terminated (0 at end)
+    dw 'Hello World!', 0       ; Message to print  
 
-times 510 - ($ - $$) db 0  ; Pad the file with 0s to make it 512 bytes
-dw 0xAA55                  ; Boot signature (magic number the BIOS requires)
+times 510 - ($ - $$) db 0      ; Pad the file with 0s to make it 512 bytes
+dw 0xAA55                      ; Boot signature (magic number the BIOS requires)
