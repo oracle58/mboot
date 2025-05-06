@@ -44,6 +44,7 @@ disk_read_error:
 ; ── GDT TABLE ────────────────────────────────────────────────────────────────
 gdt:
     .start:
+        
         dd 0x00000000   ; null descriptor
         dd 0x00000000
 
