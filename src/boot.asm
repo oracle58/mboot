@@ -32,7 +32,7 @@ start:
 
 load_PM:
     cli
-    lgdt [gdt_descriptor]
+    lgdt [gdt.descriptor]
     mov eax, cr0
     or al, 1
     mov cr0, eax
@@ -42,31 +42,32 @@ disk_read_error:
     hlt
 
 ; ── GDT TABLE ────────────────────────────────────────────────────────────────
-gdt_start:
-    dd 0x00000000   ; null descriptor
-    dd 0x00000000
+gdt:
+    .start:
+        dd 0x00000000   ; null descriptor
+        dd 0x00000000
 
-    ; code segment descriptor
-    dw 0xFFFF       ; limit low
-    dw 0x0000       ; base low
-    db 0x00         ; base mid
-    db 10011010b    ; access: P=1, DPL=0, S=1, E=1, RW=1
-    db 11001111b    ; flags: G=1, D/B=1, L=0, AVL=0
-    db 0x00         ; base high
+        ; code segment descriptor
+        dw 0xFFFF       ; limit low
+        dw 0x0000       ; base low
+        db 0x00         ; base mid
+        db 10011010b    ; access: P=1, DPL=0, S=1, E=1, RW=1
+        db 11001111b    ; flags: G=1, D/B=1, L=0, AVL=0
+        db 0x00         ; base high
 
-    ; data segment descriptor
-    dw 0xFFFF
-    dw 0x0000
-    db 0x00
-    db 10010010b    ; access: P=1, DPL=0, S=1, E=0, RW=1
-    db 11001111b    ; flags
-    db 0x00
+        ; data segment descriptor
+        dw 0xFFFF
+        dw 0x0000
+        db 0x00
+        db 10010010b    ; access: P=1, DPL=0, S=1, E=0, RW=1
+        db 11001111b    ; flags
+        db 0x00
 
-gdt_end:
+    .end:
 
-gdt_descriptor:
-    dw gdt_end - gdt_start - 1
-    dd gdt_start
+    .descriptor:
+        dw gdt.end - gdt.start - 1
+        dd gdt.start
 
 ; ── DISK ADDRESS PACKET (16 bytes) ──────────────────────────────────────────
 ; Structure: size(1), reserved(1), count(2), off(2), seg(2), high dword(4), LBA(8)
