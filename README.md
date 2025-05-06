@@ -2,6 +2,29 @@
 
 Minimal Bootloader for the minos kernel.
 
+## Quickstart
+```bash
+chmod +x load.sh
+./load.sh
+```
+
+## Boot Sector Memory Map
+
+| Physical Address         | Size            | Content                                                       |
+|--------------------------|-----------------|---------------------------------------------------------------|
+| `0x00000–0x07BFF`        | 31 KB           | BIOS data areas: IVT (0x0000–0x03FF), BDA (0x0400–0x04FF), EBDA |
+| **Boot Sector**<br>`0x07C00–0x07DFF` | **512 B**       | Loaded by BIOS as the first sector of the disk                |
+| `0x07C00–0x07C1F`        | 32 B            | Real-mode setup: `cli`, clear segments, set `SP`, `sti`       |
+| `0x07C20–0x07C2F`        | 16 B            | Prepare & invoke EDD load: disk-packet + `int 13h/AH=0x42`     |
+| `0x07C30–0x07C6F`        | 64 B            | GDT entries (`gdt_start` … `gdt_end`)                         |
+| `0x07C70–0x07C77`        | 8 B             | GDT descriptor (`gdt_descriptor`)                             |
+| `0x09000`                | 16 B            | Disk-address packet data (pointer into 1 MiB)                 |
+| `0x07DFF`                | 1 B             | Padding up to offset 510                                      |
+| `0x07FFE–0x07FFF`        | 2 B             | Boot signature (`0xAA55`)                                     |
+| **Kernel**<br>`0x100000–…`   | 8 × 512 B + …  | Kernel flat binary (`_start`/`PModeMain` + `.text`, `.data`, `.bss`) |
+
+
+
 ## Build
 
 ```bash
@@ -38,26 +61,6 @@ break kmain
 
 target remote localhost:1234
 ```
-
-## Boot Sector Memory Map
-
-Address         | Content
---------------- | -------------------------------------------------------------
-`0x0000:0000`   | (Unused / BIOS data area)
-…               | …
-`0x0000:7C00`   | Start of bootloader (`start:`)
-`0x0000:7C00–7DFF` | 512 B boot sector:
-                 - `0x7C00–…` Real-mode setup & `start:`…`sti`  
-                 - `…–…` EDD loader (`int 13h AH=42h`)  
-                 - `…–…` GDT table (`gdt_start`…`gdt_end`)  
-                 - `…–…` GDT descriptor (`gdt_descriptor`)  
-                 - `0x0000:0x9000` → 16-byte disk-address packet  
-                 - padding up to offset 510  
-                 - `0xAA55` boot signature at offset 510
-                 
-`0x0010 0000`   | Start of kernel (`_start`/`PModeMain`); 8 sectors DMA-loaded here  
-…               | rest of `.text`, `.rodata`, `.data`, `.bss`
-
 
 ## Global Descriptor Table
 
