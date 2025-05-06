@@ -2,35 +2,22 @@
 
 Minimal Bootloader for the minos kernel.
 
-## Compile
+## Assemble
 
-```shell
-nasm -f bin boot.asm -o boot.bin
+```bash
+make all
 ```
 
-## Run
+## Emulate
 
-```shell
+```bash
+# legacy display
 qemu-system-x86_64 -hda ./boot.bin
+
+# curses display
+qemu-system-x86_64 -display curses -drive format=raw,file=boot.bin
 ```
 
-### QMP
-
-```shell
-qemu-system-x86_64 \
-  -drive format=raw,file=boot.bin \
-  -S \
-  -qmp tcp:127.0.0.1:4444,server=on,wait=off \
-  -chardev socket,id=mon0,host=127.0.0.1,port=4445,server=on,wait=off \
-  -mon chardev=mon0,mode=control \
-  -nographic
-
-qemu-system-x86_64 \
-  -drive format=raw,file=boot.bin \
-  -S \
-  -qmp tcp:127.0.0.1:4444,server=on,wait=off \
-  -nographic
-```
 
 ## Notes
 
