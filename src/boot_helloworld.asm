@@ -2,22 +2,21 @@
 [ORG 0x7C00]           ; Load at 0x7C00 (where BIOS loads bootloader)
 
 start: 
-    cli                ; Disable interrupts (prevents random interruptions while setting up)
+    cli                ; Clear interrupts 
     mov ax, 0x00       
-    mov ds, ax         ; Data segment to 0x0000
-    mov es, ax         ; Extra segment to 0x0000
-    mov ss, ax         ; Stack segment to 0x0000
-    mov sp, 0x7C00     ; Stack pointer at 0x7C00 (same as code load address, simple and safe)
+    mov ds, ax         ; Set Data segment to 0x00
+    mov es, ax         ; Set Extra segment to 0x00
+    mov ss, ax         ; Set Stack segment to 0x00
+    mov sp, 0x7C00     ; Set Stack pointer to 0x7C00 (top of bootloader segment)
+    mov si, msg        ; Load address of message into source index (SI) register
     sti                ; Re-enable interrupts
-
-    mov si, msg        ; Point SI (source index) to start of the message
 
 print: 
     lodsb              ; Load byte from [DS:SI] into AL, increment SI
-    cmp al, 0          ; String null terminator?
-    je done            ; If yes, jump to done
+    cmp al, 0          ; compare value in AL with string null terminator
+    je done            ; If end of string, jump to done
     mov ah, 0x0E       ; BIOS teletype function (print char in AL to screen)
-    int 0x10           ; Call BIOS video interrupt
+    int 0x10           ; Call BIOS teletype interrupt
     jmp print          ; Repeat for next character
 
 done: 
