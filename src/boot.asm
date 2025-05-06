@@ -1,30 +1,69 @@
-[BITS 16]              ; Assemble for 16-bit real mode (BIOS mode)
-[ORG 0x7C00]           ; Load at 0x7C00 (where BIOS loads bootloader)
+[BITS 16]
+[ORG 0x7C00]
 
-start: 
-    cli                ; Clear interrupts 
-    mov ax, 0x00       
-    mov ds, ax         ; Set Data segment to 0x00
-    mov es, ax         ; Set Extra segment to 0x00
-    mov ss, ax         ; Set Stack segment to 0x00
-    mov sp, 0x7C00     ; Set Stack pointer to 0x7C00 (top of bootloader segment)
-    mov si, msg        ; Load address of message into source index (SI) register
-    sti                ; Re-enable interrupts
+CODE_OFFSET  equ 0x8
+DATA_OFFSET  equ 0x10
 
-print: 
-    lodsb              ; Load byte from [DS:SI] into AL, increment SI
-    cmp al, 0          ; compare value in AL with string null terminator
-    je done            ; If end of string, jump to done
-    mov ah, 0x0E       ; BIOS teletype function (print char in AL to screen)
-    int 0x10           ; Call BIOS teletype interrupt
-    jmp print          ; Repeat for next character
+start:
+    cli
+    xor ax, ax
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov sp, 0x7C00
+    sti
 
-done: 
-    cli                ; Disable interrupts before halting
-    hlt                ; Halt CPU Exec
+load_PM:
+    cli
+    lgdt[gdt.descriptor]       
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+    jmp CODE_OFFSET:PModeMain
 
-msg: 
-    dw 'Hello World!', 0       ; Message to print  
+; ── here begins our single “gdt” block ───────────────────────────────────────
+gdt:
+    .start:
 
-times 510 - ($ - $$) db 0      ; Pad the file with 0s to make it 512 bytes
-dw 0xAA55                      ; Boot signature (magic number the BIOS requires)
+    dd 0x00000000                  ; Null descriptor
+    dd 0x00000000
+
+    ; ── code segment descriptor ───────────────────────────────────────────
+    dw 0xFFFF                      ; Limit
+    dw 0x0000                      ; Base
+    db 0x00
+    db 10011010b                   ; P=1, DPL=00, S=1(=code/data), E=1(code), RW=1
+    db 11001111b                   ; G=1, D/B=1, L=0, AVL=0
+
+    ; ── data segment descriptor ───────────────────────────────────────────
+    dw 0xFFFF
+    dw 0x0000
+    db 0x00
+    db 10010010b                   ; P=1, DPL=00, S=1, E=0(data), RW=1
+    db 11001111b
+
+    .end:                                
+
+    .descriptor:                       
+        dw  gdt.end - gdt.start - 1      ; size of GDT minus one
+        dd  gdt.start                    ; pointer to GDT base
+; ────────────────────────────────────────────────────────────────────────────
+
+[BITS 32]
+PModeMain:
+    mov ax, DATA_OFFSET
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov ss, ax
+    mov gs, ax
+    mov ebp, 0x9C00
+    mov esp, ebp
+
+    in   al, 0x92
+    or   al, 2
+    out  0x92, al
+    jmp  $
+
+times 510 - ($ - $$) db 0
+dw    0xAA55
