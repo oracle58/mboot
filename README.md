@@ -2,23 +2,32 @@
 
 Minimal Bootloader for the minos kernel.
 
-## Assemble
+## Assemble Bootloader
 
 ```bash
 make all
 ```
 
-## Emulate
+## Build Kernel
+
+```bash
+gcc -m32 -std=gnu11 -ffreestanding -O2 -c src/kernel.c -o build/kernel.o
+ld -m elf_i386 -T linker.ld build/kernel.o -o build/kernel.bin --nmagic
+```
+
+## Emulate Bootloader
 
 ```bash
 # no graphic
 qemu-system-x86_64 -nographic -drive format=raw,file=./bin/boot.bin
+qemu-system-x86_64 -nographic -drive format=raw,file=./bin/os.bin
 
 # legacy drive shorthand (uses default GUI)
 qemu-system-x86_64 -hda ./bin/boot.bin
 
 # curses display
 qemu-system-x86_64 -display curses -drive format=raw,file=./bin/boot.bin
+qemu-system-x86_64 -display curses -drive format=raw,file=./bin/os.bin
 ```
 
 ## Boot Sector Memory Map
@@ -30,7 +39,7 @@ Address      | Data
 0x7C06       | Pointer to 'Hello World!' message
 0x7C10       | 'Hello World!', 0 
 0x7C1B       | 0x00 (end of message)
-0x7DFE - 0x7DFF | 0x55AA (boot signature at end of 512-byte sector)
+0x7DFE - 0x7DFF | 0x55AA (boot signature at end of 512-byte sector)when l
 
 ## Global Descriptor Table
 
