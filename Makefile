@@ -7,7 +7,7 @@ INCLUDE_DIR := inc
 
 FILES := $(BUILD_DIR)/kernel.asm.o $(BUILD_DIR)/kernel.o
 FLAGS := -g -ffreestanding -nostdlib -nostartfiles -nodefaultlibs \
-         -Wall -O0 -I$(INCLUDE_DIR) -fno-pic -fno-pie
+         -Wall -O0 -I$(INCLUDE_DIR) 
 
 all: image
 
@@ -16,31 +16,17 @@ $(BIN_DIR) $(BUILD_DIR):
 
 assemble: | $(BIN_DIR) $(BUILD_DIR)
 	nasm -f bin    $(SOURCE_DIR)/boot.asm       -o $(BIN_DIR)/boot.bin
-	nasm -f elf32  -g $(SOURCE_DIR)/kernel.asm  -o $(BUILD_DIR)/kernel.asm.o
+	nasm -f elf -g $(SOURCE_DIR)/kernel.asm     -o $(BUILD_DIR)/kernel.asm.o
 
 kernel: | $(BUILD_DIR)
-	# compile C with the i686-elf cross-compiler
-	i686-elf-gcc $(FLAGS) -std=gnu99 \
-	  -c $(SOURCE_DIR)/kernel.c \
-	  -o $(BUILD_DIR)/kernel.o
-
-	# glue into one relocatable object
-	i686-elf-ld -r $(FILES) \
-	  -o $(BUILD_DIR)/completeKernel.o
-
-	# link to flat binary using your custom linker script
-	i686-elf-gcc $(FLAGS) \
-	  -T $(SOURCE_DIR)/linker.ld \
-	  -o $(BUILD_DIR)/kernel.elf \
-	  $(BUILD_DIR)/completeKernel.o
-
-	# final kernel image
-	cp $(BUILD_DIR)/kernel.elf $(BIN_DIR)/kernel.bin
+	i686-elf-gcc -I./src $(FLAGS) -std=gnu99 -c ./src/kernel.c -o ./build/kernel.o
+	i686-elf-ld -g -relocatable $(FILES) -o ./build/completeKernel.o
+	i686-elf-gcc $(FLAGS) -T ./src/linker.ld -o ./bin/kernel.bin -ffreestanding -O0 -nostdlib ./build/completeKernel.o
 
 image: assemble kernel
-	# build the final OS image
-	cat $(BIN_DIR)/boot.bin $(BIN_DIR)/kernel.bin > $(BIN_DIR)/os.bin
-	dd if=/dev/zero bs=512 count=8 >> $(BIN_DIR)/os.bin
+	dd if=./$(BIN_DIR)/boot.bin >> ./bin/os.bin
+	dd if=./$(BIN_DIR)/kernel.bin >> ./bin/os.bin
+	dd if=/dev/zero bs=512 count=8 >> ./bin/os.bin
 
 clean:
 	rm -rf $(BIN_DIR) $(BUILD_DIR)
