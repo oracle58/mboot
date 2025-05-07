@@ -18,6 +18,11 @@ start:
     mov sp, 0x7C00
     sti                           ; Enable interrupts
 
+    ; ── ENABLE A20 VIA PORT 0x92 ──
+    in    al, 0x92
+    or    al, 00000010b
+    out   0x92, al
+
 ; ── EXTENDED-READ KERNEL TO 1 MiB ───────────────────────────────────────────
 ; place packet below 64 KiB (at 0x0000:0x9000)
     mov ax, 0x0000
@@ -44,7 +49,7 @@ disk_read_error:
 ; ── GDT TABLE ────────────────────────────────────────────────────────────────
 gdt:
     .start:
-        
+
         dd 0x00000000   ; null descriptor
         dd 0x00000000
 
@@ -81,22 +86,39 @@ disk_packet:
     dd 0                                ; high dword unused
     dq 1                                ; starting LBA (sector #1)
 
-[BITS 32]
-PModeMain:
-    mov ax, DATA_OFFSET
-    mov ds, ax
-    mov es, ax
-    mov fs, ax
-    mov ss, ax
-    mov gs, ax
-    mov ebp, 0x9C00
-    mov esp, ebp
-
-    in   al, 0x92
-    or   al, 2
-    out  0x92, al
-
-    jmp CODE_OFFSET:KERNEL_START_ADDR
+    [BITS 32]
+    PModeMain:
+        mov ax, DATA_OFFSET
+        mov ds, ax
+        mov es, ax
+        mov fs, ax
+        mov ss, ax
+        mov gs, ax
+        mov ebp, 0x9C00
+        mov esp, ebp
+    
+        ; Write test pattern to verify VGA memory access
+        mov edi, 0xB8000
+        mov byte [edi], 'K'      ; First char
+        mov byte [edi+1], 0x07
+        mov byte [edi+2], '>'    ; Second char
+        mov byte [edi+3], 0x07
+    
+        ; Move cursor after the '>' character
+        mov dx, 0x3D4
+        mov al, 0x0F
+        out dx, al
+        mov dx, 0x3D5
+        mov al, 3           ; Position 3 (after >)
+        out dx, al
+        mov dx, 0x3D4
+        mov al, 0x0E
+        out dx, al
+        mov dx, 0x3D5
+        mov al, 0
+        out dx, al
+    
+        jmp dword CODE_OFFSET:KERNEL_START_ADDR
 
 times 510 - ($ - $$) db 0
     dw    0xAA55
