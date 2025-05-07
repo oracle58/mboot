@@ -23,8 +23,6 @@ chmod +x load.sh
 | `0x07FFE–0x07FFF`        | 2 B             | Boot signature (`0xAA55`)                                     |
 | **Kernel**<br>`0x100000–…`   | 8 × 512 B + …  | Kernel flat binary (`_start`/`PModeMain` + `.text`, `.data`, `.bss`) |
 
-
-
 ## Build
 
 ```bash
@@ -53,13 +51,19 @@ qemu-system-x86_64 -display curses -drive format=raw,file=./bin/os.bin
 
 ## Debug
 ```bash
+# required debug tools
 sudo pacman -Sy hexedit
 sudo pacman -Sy gdb
 
+# debug using gdb
+gdb
 add-symbol-file ./build/completeKernel.o 0x100000
 break kmain
-
 target remote localhost:1234
+
+# quick debug using gdb
+chmod +x gdb.sh
+./gdb.sh
 ```
 
 ## Global Descriptor Table
@@ -67,6 +71,8 @@ target remote localhost:1234
 **Source**: https://wiki.osdev.org/Global_Descriptor_Table
 
 ### Access Byte
+
+- Set to `10011010b`
 
 | Bit 7 | Bits 6–5 | Bit 4 | Bit 3 | Bit 2 | Bit 1 | Bit 0 |
 |:-----:|:--------:|:-----:|:-----:|:-----:|:-----:|:-----:|
@@ -83,9 +89,11 @@ target remote localhost:1234
 | **RW**  | 1      | **Read/Write** — For data segments: 0 = read-only, 1 = writable; for code segments: 0 = non-readable, 1 = readable.                                                     |
 | **A**   | 0      | **Accessed** — Set by the CPU on first access; initialize to 1 if needed to avoid a fault on first access.                                                           |
 
-- Set to `10011010b`
+
 
 ### Flags
+
+- Set to `11001111b`
 
 | Bit 3 | Bit 2 | Bit 1 | Bit 0    |
 |:-----:|:-----:|:-----:|:---------|
@@ -97,7 +105,6 @@ target remote localhost:1234
 | DB   | 2   | Default size: 0 = 16-bit protected mode segment; 1 = 32-bit protected mode segment  |
 | L    | 1   | Long-mode code: 1 = 64-bit code segment (DB must be 0); 0 = other segment types      |
 
-- Set to `11001111b`
 
 ## BIOS Common functions
 **source**: https://wiki.osdev.org/BIOS
@@ -116,21 +123,3 @@ target remote localhost:1234
 * `INT 0x10, AX = 0x4F02` -- select VESA video modes
 * `INT 0x10, AX = 0x4F0A` -- VESA 2.0 protected mode interface
 
-## Video mem
-
-```c
-    // VGA text buffer starts at 0xB8000
-    char *video_memory = (char *)0xB8000;
-
-    video_memory[0] = 'H';
-    video_memory[1] = 0x07; 
-
-    video_memory[2] = 'i';
-    video_memory[3] = 0x07;
-
-    video_memory[4] = '!';
-    video_memory[5] = 0x07;
-
-    video_memory[6] = ' ';
-    video_memory[7] = 0x07;
-```
