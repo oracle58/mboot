@@ -1,11 +1,16 @@
 # mboot
 
-Minimal Bootloader for the minos kernel.
+This repository contains a minimal x86 bootloader (in NASM) and a tiny protected-mode kernel. The bootloader uses `EDD (INT 0x13h, AH=0x42)` to load the kernel to 1 MiB, switches into 32-bit mode via a simple GDT, then jumps to kmain. 
 
 ## Quickstart
 ```bash
 chmod +x load.sh
+
+# Without Graphics
 ./load.sh
+
+# With Graphics
+./load.sh -g
 ```
 
 ## Boot Sector Memory Map
@@ -64,6 +69,12 @@ target remote localhost:1234
 # quick debug using gdb
 chmod +x gdb.sh
 ./gdb.sh
+```
+
+**Output**:
+```
+Breakpoint 1, kmain () at ./src/kernel.c:3
+3       void kmain(void) {
 ```
 
 ## Global Descriptor Table
