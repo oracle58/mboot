@@ -73,19 +73,15 @@ target remote localhost:1234
 |   P   |   DPL    |   S   |   E   |   DC  |   RW  |   A   |
 
 
-| Field | Bit(s) | Description |
-|-------|--------|-------------|
-| **P** | 7      | **Present** — Must be 1 for a valid segment. |
-| **DPL** | 6–5   | **Descriptor Privilege Level** — 0 = kernel (highest), 3 = user (lowest). |
-| **S** | 4      | **Descriptor Type** — 0 = system segment (e.g. TSS), 1 = code/data segment. |
-| **E** | 3      | **Executable** — 0 = data segment, 1 = code segment (executable). |
-| **DC** | 2      | **Direction / Conforming**  
-• Data: 0 = grows up, 1 = grows down.  
-• Code: 0 = non-conforming (only same DPL), 1 = conforming (can be called from ≥ DPL). |
-| **RW** | 1      | **Read/Write**  
-• Data: 0 = read-only, 1 = writable (read always allowed).  
-• Code: 0 = non-readable, 1 = readable (write never allowed). |
-| **A** | 0      | **Accessed** — Set by CPU on first access; avoid trapping faults by initializing to 1 if needed. |
+| Field   | Bit(s) | Description                                                                                                                                                            |
+|---------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **P**   | 7      | **Present** — Must be 1 for a valid segment.                                                                                                                           |
+| **DPL** | 6–5    | **Descriptor Privilege Level** — 0 = kernel (highest), 3 = user (lowest).                                                                                              |
+| **S**   | 4      | **Descriptor Type** — 0 = system segment (e.g. TSS), 1 = code/data segment.                                                                                            |
+| **E**   | 3      | **Executable** — 0 = data segment, 1 = code segment (executable).                                                                                                      |
+| **DC**  | 2      | **Direction/Conforming** — For data segments: 0 = grows up, 1 = grows down; for code segments: 0 = non-conforming (only same DPL), 1 = conforming (callable from ≥ DPL). |
+| **RW**  | 1      | **Read/Write** — For data segments: 0 = read-only, 1 = writable; for code segments: 0 = non-readable, 1 = readable.                                                     |
+| **A**   | 0      | **Accessed** — Set by the CPU on first access; initialize to 1 if needed to avoid a fault on first access.                                                           |
 
 - Set to `10011010b`
 
