@@ -1,6 +1,5 @@
-#ifndef KERNEL_H
-#define KERNEL_H
+#pragma once
 
 void kmain(void);
 
-#endif 
+

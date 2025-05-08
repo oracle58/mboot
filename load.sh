@@ -18,8 +18,8 @@ COMMON_ARGS=(
 
 if [[ $GFX -eq 1 ]]; then
   echo "Starting with graphics (curses)…"
-  qemu-system-x86_64 "${COMMON_ARGS[@]}" -display curses
+  qemu-system-i386 "${COMMON_ARGS[@]}" -display curses
 else
   echo "Starting in nographics mode…"
-  qemu-system-x86_64 "${COMMON_ARGS[@]}" -nographic
+  qemu-system-i386 "${COMMON_ARGS[@]}" -nographic
 fi
