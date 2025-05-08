@@ -1,38 +1,10 @@
 #include "kernel.h"
 
-static inline void disable_vga_caching(void) {
-    // Disable caching for VGA memory (0xB8000 - 0xBFFFF)
-    asm volatile (
-        "movl $0x200, %%ecx\n"        // IA32_MTRR_DEF_TYPE MSR
-        "rdmsr\n"
-        "andl $~0x800, %%eax\n"       // Clear E (enable MTRRs)
-        "wrmsr\n"
-
-        "movl $0x250, %%ecx\n"        // IA32_MTRR_PHYSBASE0 MSR
-        "movl $0xB8000, %%eax\n"      // Base address
-        "movl $0x0, %%edx\n"          // Type: Uncacheable
-        "wrmsr\n"
-
-        "movl $0x258, %%ecx\n"        // IA32_MTRR_PHYSMASK0 MSR
-        "movl $0xFFFFF800, %%eax\n"   // Mask (4 KiB granularity)
-        "movl $0x800, %%edx\n"        // Valid bit
-        "wrmsr\n"
-
-        "movl $0x200, %%ecx\n"        // IA32_MTRR_DEF_TYPE MSR
-        "rdmsr\n"
-        "orl $0x800, %%eax\n"         // Set E (enable MTRRs)
-        "wrmsr\n"
-        :
-        :
-        : "eax", "ebx", "ecx", "edx"
-    );
-}
-
 void kmain(void) {
     volatile unsigned int *vga = (volatile unsigned int*)0xB8000;
 
-    // Disable caching for VGA memory
-    disable_vga_caching();
+    // Debug: Write directly to VGA memory to confirm kmain execution
+    vga[2] = 0x2F4D2F4D;  // "MM" in green on black
 
     // Clear screen first (80x25 characters)
     for (int i = 0; i < (80 * 25) / 2; i++) {
