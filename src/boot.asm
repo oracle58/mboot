@@ -18,6 +18,10 @@ start:
     mov sp, 0x7C00
     sti                           ; Enable interrupts
 
+    ; Print "Loading kernel..." message
+    mov si, loading_msg
+    call print_string
+
     ; ── ENABLE A20 VIA PORT 0x92 ──
     in    al, 0x92
     or    al, 00000010b
@@ -35,7 +39,15 @@ start:
     int 0x13
     jc disk_read_error
 
+    ; Print "Kernel loaded OK" message
+    mov si, kernel_ok_msg
+    call print_string
+
 load_PM:
+    ; Print "Entering PM" message
+    mov si, entering_pm_msg
+    call print_string
+
     cli
     lgdt [gdt.descriptor]
     mov eax, cr0
@@ -44,7 +56,23 @@ load_PM:
     jmp CODE_OFFSET:PModeMain     ; far-jump into protected mode
 
 disk_read_error:
+    mov si, disk_error_msg
+    call print_string
     hlt
+
+; Print a null-terminated string from SI
+print_string:
+    pusha
+    mov ah, 0x0E        ; BIOS teletype function
+.loop:
+    lodsb               ; Load byte from SI into AL
+    test al, al         ; Check if character is 0 (end of string)
+    jz .done            ; If zero, exit routine
+    int 0x10            ; Print character
+    jmp .loop
+.done:
+    popa
+    ret
 
 ; ── GDT TABLE ────────────────────────────────────────────────────────────────
 gdt:
@@ -86,6 +114,12 @@ disk_packet:
     dd 0                   ; high dword unused
     dq 1                   ; starting LBA (sector #1)
 
+; Debug messages
+loading_msg:     db "Loading kernel...", 13, 10, 0
+kernel_ok_msg:   db "Kernel loaded OK", 13, 10, 0
+entering_pm_msg: db "Entering PM...", 13, 10, 0
+disk_error_msg:  db "ERROR: Failed to load kernel!", 13, 10, 0
+
     [BITS 32]
     PModeMain:
         mov ax, DATA_OFFSET
@@ -99,9 +133,9 @@ disk_packet:
     
         ; Write test pattern to verify VGA memory access
         mov edi, 0xB8000
-        mov byte [edi], 'K'      ; First char
+        mov byte [edi], 'P'      ; First char - P for PM successful
         mov byte [edi+1], 0x07
-        mov byte [edi+2], '>'    ; Second char
+        mov byte [edi+2], 'M'    ; Second char
         mov byte [edi+3], 0x07
     
         ; Move cursor after the '>' character
@@ -117,9 +151,6 @@ disk_packet:
         mov dx, 0x3D5
         mov al, 0
         out dx, al
-
-        ; Debug: Write directly to VGA memory
-        mov dword [0xB8000], 0x4F4B4F4B   ; "KK" in white on red
     
         jmp dword CODE_OFFSET:KERNEL_START_ADDR
 

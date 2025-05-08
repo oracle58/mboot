@@ -13,8 +13,9 @@ _start:
     mov ss, ax
     mov esp, 0x90000
 
-    ; Debug: Write directly to VGA memory
-    mov dword [0xB8000], 0x4F4B4F4B   ; "KK" in white on red
+    ; Write a debug message to VGA memory showing kernel entry point was reached
+    mov dword [0xB8000], 0x074B074B   ; "KK" in white
+    mov dword [0xB8004], 0x0721074F   ; "O!" in white
 
     ; Call C kernel
     call kmain
