@@ -4,10 +4,10 @@
 CODE_OFFSET       equ 0x8
 DATA_OFFSET       equ 0x10
 
-; Kernel load address at 1 MiB
-KERNEL_START_ADDR equ 0x100000
-KERNEL_OFFSET_LOW equ KERNEL_START_ADDR & 0xFFFF    ; low 16 bits (0x0000)
-KERNEL_LOAD_SEG   equ KERNEL_START_ADDR >> 4       ; segment (0x1000)
+; Kernel load address constants - use direct values instead of calculations
+KERNEL_START_ADDR equ 0x100000    ; 1MB physical address
+KERNEL_SEG        equ 0x1000      ; Segment for disk load (1MB >> 4)
+KERNEL_OFF        equ 0x0000      ; Offset within segment
 
 start:
     cli                           ; Disable interrupts
@@ -79,12 +79,12 @@ gdt:
 ; Structure: size(1), reserved(1), count(2), off(2), seg(2), high dword(4), LBA(8)
 ; Here: read 8 sectors starting at LBA=1 into 0x0010 0000
 disk_packet:
-    db 16, 0                            ; packet size, reserved
-    dw 8                                ; number of sectors
-    dw KERNEL_OFFSET_LOW                ; offset low
-    dw KERNEL_LOAD_SEG                  ; segment (0x1000)
-    dd 0                                ; high dword unused
-    dq 1                                ; starting LBA (sector #1)
+    db 16, 0                ; packet size, reserved
+    dw 8                    ; number of sectors
+    dw 0x0000              ; offset - use direct value
+    dw 0x1000              ; segment - use direct value
+    dd 0                   ; high dword unused
+    dq 1                   ; starting LBA (sector #1)
 
     [BITS 32]
     PModeMain:
@@ -121,4 +121,4 @@ disk_packet:
         jmp dword CODE_OFFSET:KERNEL_START_ADDR
 
 times 510 - ($ - $$) db 0
-    dw    0xAA55
+dw    0xAA55
