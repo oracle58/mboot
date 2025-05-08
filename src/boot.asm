@@ -54,7 +54,7 @@ gdt:
         dd 0x00000000
 
         ; code segment descriptor
-        dw 0xFFFF       ; limit low
+        dw 0xFFFF       ; limit low (4 GiB limit)
         dw 0x0000       ; base low
         db 0x00         ; base mid
         db 10011010b    ; access: P=1, DPL=0, S=1, E=1, RW=1
@@ -62,12 +62,12 @@ gdt:
         db 0x00         ; base high
 
         ; data segment descriptor
-        dw 0xFFFF
-        dw 0x0000
-        db 0x00
+        dw 0xFFFF       ; limit low (4 GiB limit)
+        dw 0x0000       ; base low
+        db 0x00         ; base mid
         db 10010010b    ; access: P=1, DPL=0, S=1, E=0, RW=1
-        db 11001111b    ; flags
-        db 0x00
+        db 11001111b    ; flags: G=1, D/B=1, L=0, AVL=0
+        db 0x00         ; base high
 
     .end:
 
@@ -117,6 +117,9 @@ disk_packet:
         mov dx, 0x3D5
         mov al, 0
         out dx, al
+
+        ; Debug: Write directly to VGA memory
+        mov dword [0xB8000], 0x4F4B4F4B   ; "KK" in white on red
     
         jmp dword CODE_OFFSET:KERNEL_START_ADDR
 

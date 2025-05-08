@@ -69,6 +69,10 @@ target remote localhost:1234
 # quick debug using gdb
 chmod +x gdb.sh
 ./gdb.sh
+
+# VGA Debug
+x/8x 0xB8000
+
 ```
 
 **Output**:
