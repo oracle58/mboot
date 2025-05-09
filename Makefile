@@ -1,11 +1,9 @@
-# $@ = target file
-# $< = first dependency
-# $^ = all dependencies
-
 TARGET      := i386
 BIN_DIR     := targets/$(TARGET)/bin
 BUILD_DIR   := targets/$(TARGET)/build
 SOURCE_DIR  := src
+BOOT_DIR    := $(SOURCE_DIR)/bootloader
+OS_DIR      := $(SOURCE_DIR)/os
 
 all: $(BIN_DIR)/os.bin
 
@@ -16,17 +14,17 @@ $(BIN_DIR) $(BUILD_DIR):
 $(BIN_DIR)/kernel.bin: $(BUILD_DIR)/kernel_entry.o $(BUILD_DIR)/kernel.o $(BUILD_DIR)/vga.o | $(BIN_DIR)
 	ld -m elf_i386 -o $@ -T /home/oracle/mboot/linker.ld $^ --oformat binary -nostdlib
 
-$(BUILD_DIR)/kernel_entry.o: $(SOURCE_DIR)/kernel_entry.asm | $(BUILD_DIR)
+$(BUILD_DIR)/kernel_entry.o: $(BOOT_DIR)/kernel_entry.asm | $(BUILD_DIR)
 	nasm $< -f elf -o $@
 
-$(BUILD_DIR)/kernel.o: $(SOURCE_DIR)/kernel.c | $(BUILD_DIR)
+$(BUILD_DIR)/kernel.o: $(OS_DIR)/kernel.c | $(BUILD_DIR)
 	gcc -m32 -O0 -g -ffreestanding -fno-pic -fno-pie -nostdlib -nostartfiles -nodefaultlibs -c $< -o $@
 
-$(BUILD_DIR)/vga.o: $(SOURCE_DIR)/vga.c $(SOURCE_DIR)/vga.h | $(BUILD_DIR)
+$(BUILD_DIR)/vga.o: $(OS_DIR)/vga.c $(OS_DIR)/vga.h | $(BUILD_DIR)
 	gcc -m32 -O0 -g -ffreestanding -fno-pic -fno-pie -nostdlib -nostartfiles -nodefaultlibs -c $< -o $@
 
-$(BIN_DIR)/mbr.bin: $(SOURCE_DIR)/mbr.asm $(SOURCE_DIR)/disk_load.asm $(SOURCE_DIR)/gdt.asm $(SOURCE_DIR)/main32.asm | $(BIN_DIR)
-	nasm $< -f bin -o $@ -I$(SOURCE_DIR)/
+$(BIN_DIR)/mbr.bin: $(BOOT_DIR)/mbr.asm $(BOOT_DIR)/disk_load.asm $(BOOT_DIR)/gdt.asm $(BOOT_DIR)/main32.asm | $(BIN_DIR)
+	nasm $< -f bin -o $@ -I$(BOOT_DIR)/
 
 $(BIN_DIR)/os.bin: $(BIN_DIR)/mbr.bin $(BIN_DIR)/kernel.bin | $(BIN_DIR)
 	cat $^ > $@
@@ -38,3 +36,8 @@ clean:
 	$(RM) $(BIN_DIR)/*.bin $(BUILD_DIR)/*.o *.bin *.o *.dis
 
 .PHONY: all run clean
+
+# ---- Notes ----
+# $@ = target file
+# $< = first dependency
+# $^ = all dependencies
