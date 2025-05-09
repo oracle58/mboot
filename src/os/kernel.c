@@ -9,8 +9,6 @@
 
 #include "vga.h"
 
-
-
 /**
  * @brief Initializes the kernel and displays a startup message.
  *
