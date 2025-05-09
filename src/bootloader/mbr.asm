@@ -1,6 +1,7 @@
 ;-------------------------------------------------------------------------------
-; @file mbr.asm
-; @brief Master Boot Record (MBR) bootloader for loading and starting a kernel.
+; mbr.asm
+; Master Boot Record (MBR) bootloader for loading and starting a kernel.
+; 
 ; 16-bit bootloader that runs from the MBR at 0x7c00.
 ; It loads a kernel from disk into memory, switches to 32-bit protected mode,
 ; and transfers control to the kernel. The bootloader is designed to fit within
@@ -11,8 +12,8 @@
 [org 0x7c00]              ; Set origin to 0x7c00, where BIOS loads the MBR
 
 ;-------------------------------------------------------------------------------
-; @def KERNEL_OFFSET
-; @brief Memory address where the kernel is loaded (0x1000).
+; KERNEL_OFFSET
+; Memory address where the kernel is loaded (0x1000).
 ;-------------------------------------------------------------------------------
 KERNEL_OFFSET equ 0x1000
 
@@ -33,7 +34,7 @@ jmp $                     ; Infinite loop to halt execution if control returns
 %include "switch_pm.asm"  ; Include protected mode switch routine
 
 ;-------------------------------------------------------------------------------
-; @brief Loads the kernel from disk into memory.
+; Loads the kernel from disk into memory.
 ;
 ; Configures parameters for disk_load to read 2 sectors from the boot drive
 ; into KERNEL_OFFSET (0x1000) and calls the disk loading routine.
@@ -47,7 +48,7 @@ load_kernel:
     ret                   ; Return to caller
 
 ;-------------------------------------------------------------------------------
-; @brief Entry point after switching to 32-bit protected mode.
+; Entry point after switching to 32-bit protected mode.
 ;
 ; Transfers control to the kernel loaded at KERNEL_OFFSET and enters an infinite
 ; loop if the kernel returns.
@@ -58,8 +59,7 @@ BEGIN_32BIT:
     jmp $                 ; Infinite loop to halt if kernel returns
 
 ;-------------------------------------------------------------------------------
-; @var BOOT_DRIVE
-; @brief Stores the boot drive number provided by BIOS.
+; Stores the boot drive number provided by BIOS.
 ;-------------------------------------------------------------------------------
 BOOT_DRIVE db 0
 

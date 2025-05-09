@@ -1,6 +1,6 @@
 ;-------------------------------------------------------------------------------
-; @file switch_pm.asm
-; @brief Transitions the CPU from 16-bit real mode to 32-bit protected mode.
+; switch_pm.asm
+; Transitions the CPU from 16-bit real mode to 32-bit protected mode.
 ; This module handles the switch from 16-bit real mode to 32-bit protected mode
 ; by configuring the Global Descriptor Table (GDT), enabling protected mode,
 ; and setting up segment registers and the stack. It concludes by calling the
@@ -9,7 +9,7 @@
 
 [bits 16]
 ;-------------------------------------------------------------------------------
-; @brief Initiates the switch from 16-bit real mode to 32-bit protected mode.
+; Initiates the switch from 16-bit real mode to 32-bit protected mode.
 ;
 ; Disables interrupts, loads the GDT, enables protected mode via CR0, and
 ; performs a far jump to initialize 32-bit segment registers.
@@ -24,7 +24,7 @@ switch_to_32bit:
 
 [bits 32]
 ;-------------------------------------------------------------------------------
-; @brief Initializes 32-bit protected mode environment.
+; Initializes 32-bit protected mode environment.
 ;
 ; Updates segment registers to use the data segment selector, sets up the stack
 ; at a safe memory location, and calls the 32-bit entry point.

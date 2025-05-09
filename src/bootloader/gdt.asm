@@ -1,6 +1,6 @@
 ;-------------------------------------------------------------------------------
-; @file gdt.asm
-; @brief Sets up a basic GDT with null, code, and data segment descriptors
+; gdt.asm
+; Sets up a basic GDT with null, code, and data segment descriptors
 ; to enable protected mode operation. The GDT defines segment properties such
 ; as base address, size, and access permissions for the CPU.
 ;-------------------------------------------------------------------------------

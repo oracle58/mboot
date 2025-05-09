@@ -1,16 +1,17 @@
 ;-------------------------------------------------------------------------------
-; @file disk_load.asm
-; @brief BIOS disk reading routine for loading sectors from a disk.
+; disk_load.asm
+; BIOS disk reading routine for loading sectors from a disk.
+; 
 ; Provides a function to read sectors from a disk using BIOS interrupt
 ; 0x13. It loads specified sectors into a memory buffer and includes a utility
 ; function for printing error messages to the screen.
 ;-------------------------------------------------------------------------------
 
 ;-------------------------------------------------------------------------------
-; @brief Loads sectors from a disk into memory using BIOS interrupt 0x13.
-; @param dh Number of sectors to read.
-; @param dl Drive number (set by caller).
-; @param es:bx Buffer address to store the read data (set by caller).
+;  Loads sectors from a disk into memory using BIOS interrupt 0x13.
+;  dh Number of sectors to read.
+;  dl Drive number (set by caller).
+;  es:bx Buffer address to store the read data (set by caller).
 ;
 ; Reads the specified number of sectors starting from sector 2 (after the boot
 ; sector) on cylinder 0, head 0. Preserves all registers and returns on success.
@@ -38,8 +39,8 @@ disk_load:
     ret                      ; Return to caller
 
 ;-------------------------------------------------------------------------------
-; @brief Prints a null-terminated error message to the screen using BIOS.
-; @param si Pointer to the null-terminated string to print.
+; Prints a null-terminated error message to the screen using BIOS.
+; si Pointer to the null-terminated string to print.
 ;
 ; Iteratively prints each character of the string using BIOS interrupt 0x10
 ; until a null terminator is encountered. Preserves registers except those
@@ -57,7 +58,7 @@ print_error:
     ret                      ; Return to caller
 
 ;-------------------------------------------------------------------------------
-; @brief Error message strings for disk read failures.
+; Error message strings for disk read failures.
 ;-------------------------------------------------------------------------------
 disk_error_msg: db "Disk read error!", 0
 sectors_error_msg: db "Sector count mismatch!", 0
