@@ -23,9 +23,8 @@ enum vga_color {
     VGA_COLOR_WHITE = 15,
 };
 
-void vprint(const char* str, uint8_t color);
 void vga_init(void);
 void vga_putchar(char c, uint8_t color, size_t x, size_t y);
-void vga_set_cursor(size_t row, size_t col);
+void vga_print(const char* str, uint8_t color);
 
 #endif

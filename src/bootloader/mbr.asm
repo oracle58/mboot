@@ -1,43 +1,71 @@
-[bits 16]
-[org 0x7c00]
+;-------------------------------------------------------------------------------
+; @file mbr.asm
+; @brief Master Boot Record (MBR) bootloader for loading and starting a kernel.
+; This module implements a 16-bit bootloader that runs from the MBR at 0x7c00.
+; It loads a kernel from disk into memory, switches to 32-bit protected mode,
+; and transfers control to the kernel. The bootloader is designed to fit within
+; the 512-byte MBR, including the magic number 0xAA55.
+;-------------------------------------------------------------------------------
 
-; where to load the kernel to
+[bits 16]
+[org 0x7c00]              ; Set origin to 0x7c00, where BIOS loads the MBR
+
+;-------------------------------------------------------------------------------
+; @def KERNEL_OFFSET
+; @brief Memory address where the kernel is loaded (0x1000).
+;-------------------------------------------------------------------------------
 KERNEL_OFFSET equ 0x1000
 
 ; BIOS sets boot drive in 'dl'; store for later use
-mov [BOOT_DRIVE], dl
+mov [BOOT_DRIVE], dl      ; Save boot drive number provided by BIOS in dl
 
 ; setup stack
-mov bp, 0x9000
-mov sp, bp
+mov bp, 0x9000            ; Set base pointer to 0x9000 for stack
+mov sp, bp                ; Initialize stack pointer to base (stack grows downward)
 
-call load_kernel
-call switch_to_32bit
+call load_kernel          ; Load the kernel from disk into memory
+call switch_to_32bit      ; Transition to 32-bit protected mode
 
-jmp $
+jmp $                     ; Infinite loop to halt execution if control returns
 
-%include "disk_load.asm"
-%include "gdt.asm"
-%include "main32.asm"
+%include "disk_load.asm"  ; Include disk loading routine
+%include "gdt.asm"        ; Include Global Descriptor Table definitions
+%include "switch_pm.asm"  ; Include protected mode switch routine
 
+;-------------------------------------------------------------------------------
+; @brief Loads the kernel from disk into memory.
+;
+; Configures parameters for disk_load to read 2 sectors from the boot drive
+; into KERNEL_OFFSET (0x1000) and calls the disk loading routine.
+;-------------------------------------------------------------------------------
 [bits 16]
 load_kernel:
-    mov bx, KERNEL_OFFSET ; bx -> destination
-    mov dh, 2             ; dh -> num sectors
-    mov dl, [BOOT_DRIVE]  ; dl -> disk
-    call disk_load
-    ret
+    mov bx, KERNEL_OFFSET ; Set bx to destination address (0x1000)
+    mov dh, 2             ; Set dh to number of sectors to read (2)
+    mov dl, [BOOT_DRIVE]  ; Set dl to boot drive number
+    call disk_load        ; Call disk loading routine
+    ret                   ; Return to caller
 
+;-------------------------------------------------------------------------------
+; @brief Entry point after switching to 32-bit protected mode.
+;
+; Transfers control to the kernel loaded at KERNEL_OFFSET and enters an infinite
+; loop if the kernel returns.
+;-------------------------------------------------------------------------------
 [bits 32]
 BEGIN_32BIT:
-    call KERNEL_OFFSET ; give control to the kernel
-    jmp $ ; loop in case kernel returns
+    call KERNEL_OFFSET    ; Call the kernel entry point at 0x1000
+    jmp $                 ; Infinite loop to halt if kernel returns
 
-; boot drive variable
+;-------------------------------------------------------------------------------
+; @var BOOT_DRIVE
+; @brief Stores the boot drive number provided by BIOS.
+;-------------------------------------------------------------------------------
 BOOT_DRIVE db 0
 
-; padding
-times 510 - ($-$$) db 0
-
-; magic number
-dw 0xaa55
+;-------------------------------------------------------------------------------
+; Padding and boot signature
+; Pads the remaining space to 510 bytes and adds the bootable magic number 0xAA55.
+;-------------------------------------------------------------------------------
+times 510 - ($-$$) db 0   ; Pad with zeros up to 510 bytes
+dw 0xaa55                 ; Boot sector magic number
