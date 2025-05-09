@@ -1,5 +1,4 @@
-#ifndef VGA_H
-#define VGA_H
+#pragma once
 
 #include <stddef.h>
 #include <stdint.h>
@@ -27,4 +26,3 @@ void vga_init(void);
 void vga_putchar(char c, uint8_t color, size_t x, size_t y);
 void vga_print(const char* str, uint8_t color);
 
-#endif
