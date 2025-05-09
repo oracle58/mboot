@@ -1,12 +1,12 @@
-#include "kernel.h"
+#include "vga.h"
 
-void kmain(void) {
-    volatile unsigned int *vga = (volatile unsigned int*)0xB8000;
+void start_kernel() {
+    vga_init();
+    
+    // reset cursor to top lef
+    extern void vga_set_cursor(size_t row, size_t col);
+    vga_set_cursor(0, 0);
 
-    vga[0] = 0x047B044B;  // "K>" in red (0x04)
-    vga[1] = 0x0C580C58;  // "XX" in bright red
-
-    while (1) {
-        __asm__ volatile("cli; hlt");
-    }
+    vprint("Kernel loaded", VGA_COLOR_LIGHT_GREY);
+    vprint(" OK", VGA_COLOR_LIGHT_GREEN);
 }
