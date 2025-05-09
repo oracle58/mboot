@@ -1,11 +1,16 @@
 # mboot
 
-This repository contains a minimal x86 bootloader (written in NASM) and a simple protected-mode kernel. The bootloader loads the kernel from disk into memory, sets up a basic GDT, switches the CPU to 32-bit protected mode, and jumps to the kernel's entry point.
+This repository contains a minimal x86 bootloader and a simple protected-mode kernel. The bootloader loads the kernel from disk into memory, sets up a basic GDT, switches the CPU to 32-bit protected mode, and jumps to the kernel's entry point. 
 
-## Quickstart
+## Build
 ```bash
-make clean && make all
-make run
+# dependencies
+sudo pacman -S base-devel gcc nasm qemu 
+
+# build
+make clean && make all 
+# run the image using qemu
+make run 
 ```
 
 ## Boot Sector Memory Map
