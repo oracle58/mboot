@@ -1,89 +1,31 @@
 # mboot
 
-This repository contains a minimal x86 bootloader (in NASM) and a tiny protected-mode kernel. The bootloader uses `EDD (INT 0x13h, AH=0x42)` to load the kernel to 1 MiB, switches into 32-bit mode via a simple GDT, then jumps to kmain. 
+This repository contains a minimal x86 bootloader (written in NASM) and a simple protected-mode kernel. The bootloader loads the kernel from disk into memory, sets up a basic GDT, switches the CPU to 32-bit protected mode, and jumps to the kernel's entry point.
 
 ## Quickstart
 ```bash
-chmod +x load.sh
-
-# Without Graphics
-./load.sh
-
-# With Graphics
-./load.sh -g
+make clean && make all
+make run
 ```
 
 ## Boot Sector Memory Map
 
 | Physical Address         | Size            | Content                                                       |
 |--------------------------|-----------------|---------------------------------------------------------------|
-| `0x00000–0x07BFF`        | 31 KB           | BIOS data areas: IVT (0x0000–0x03FF), BDA (0x0400–0x04FF), EBDA |
-| **Boot Sector**<br>`0x07C00–0x07DFF` | **512 B**       | Loaded by BIOS as the first sector of the disk                |
-| `0x07C00–0x07C1F`        | 32 B            | Real-mode setup: `cli`, clear segments, set `SP`, `sti`       |
-| `0x07C20–0x07C2F`        | 16 B            | Prepare & invoke EDD load: disk-packet + `int 13h/AH=0x42`     |
-| `0x07C30–0x07C6F`        | 64 B            | GDT entries (`gdt_start` … `gdt_end`)                         |
-| `0x07C70–0x07C77`        | 8 B             | GDT descriptor (`gdt_descriptor`)                             |
-| `0x09000`                | 16 B            | Disk-address packet data (pointer into 1 MiB)                 |
+| `0x00000–0x07BFF`        | 31 KB           | BIOS data areas: IVT, BDA, EBDA                               |
+| **Boot Sector**<br>`0x07C00–0x07DFF` | **512 B**       | Loaded by BIOS as the first sector of the disk (MBR)          |
+| `0x07C00–...`            | ...             | Bootloader code: sets up stack, loads kernel, sets up GDT     |
+| `0x07C00–...`            | ...             | Includes GDT, GDT descriptor, and real-mode to protected-mode switch |
 | `0x07DFF`                | 1 B             | Padding up to offset 510                                      |
 | `0x07FFE–0x07FFF`        | 2 B             | Boot signature (`0xAA55`)                                     |
-| **Kernel**<br>`0x100000–…`   | 8 × 512 B + …  | Kernel flat binary (`_start`/`PModeMain` + `.text`, `.data`, `.bss`) |
+| **Kernel**<br>`0x1000–…`     | 2 × 512 B + …  | Kernel flat binary (entry: `_start`/`start_kernel`)           |
 
-## Build
-
-```bash
-make clean    # cleanup build and bin files
-make all      # build all
-
-make assemble # assemble bootloader
-make kernel   # build kernel
-make image    # build os image
-```
-
-## Emulate Bootloader/OS
-
-```bash
-# gdb debug
-qemu-system-x86_64 -nographic -drive format=raw,file=./bin/os.bin -gdb tcp::1234 stdio -S
-
-# no graphic
-qemu-system-x86_64 -nographic -drive format=raw,file=./bin/boot.bin
-qemu-system-x86_64 -nographic -drive format=raw,file=./bin/os.bin
-
-# curses display
-qemu-system-x86_64 -display curses -drive format=raw,file=./bin/boot.bin
-qemu-system-x86_64 -display curses -drive format=raw,file=./bin/os.bin
-```
-
-## Debug
-```bash
-# required debug tools
-sudo pacman -Sy hexedit
-sudo pacman -Sy gdb
-
-# debug using gdb
-gdb
-add-symbol-file ./build/completeKernel.o 0x100000
-break kmain
-target remote localhost:1234
-
-# quick debug using gdb
-chmod +x gdb.sh
-./gdb.sh
-```
-
-**Output**:
-```
-Breakpoint 1, kmain () at ./src/kernel.c:3
-3       void kmain(void) {
-```
 
 ## Global Descriptor Table
 
 **Source**: https://wiki.osdev.org/Global_Descriptor_Table
 
 ### Access Byte
-
-- Set to `10011010b`
 
 | Bit 7 | Bits 6–5 | Bit 4 | Bit 3 | Bit 2 | Bit 1 | Bit 0 |
 |:-----:|:--------:|:-----:|:-----:|:-----:|:-----:|:-----:|
@@ -103,8 +45,6 @@ Breakpoint 1, kmain () at ./src/kernel.c:3
 
 
 ### Flags
-
-- Set to `11001111b`
 
 | Bit 3 | Bit 2 | Bit 1 | Bit 0    |
 |:-----:|:-----:|:-----:|:---------|
