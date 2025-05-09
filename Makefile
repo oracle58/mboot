@@ -23,7 +23,7 @@ $(BUILD_DIR)/kernel.o: $(OS_DIR)/kernel.c | $(BUILD_DIR)
 $(BUILD_DIR)/vga.o: $(OS_DIR)/vga.c $(OS_DIR)/vga.h | $(BUILD_DIR)
 	gcc -m32 -O0 -g -ffreestanding -fno-pic -fno-pie -nostdlib -nostartfiles -nodefaultlibs -c $< -o $@
 
-$(BIN_DIR)/mbr.bin: $(BOOT_DIR)/mbr.asm $(BOOT_DIR)/disk_load.asm $(BOOT_DIR)/gdt.asm $(BOOT_DIR)/main32.asm | $(BIN_DIR)
+$(BIN_DIR)/mbr.bin: $(BOOT_DIR)/mbr.asm $(BOOT_DIR)/disk_load.asm $(BOOT_DIR)/gdt.asm $(BOOT_DIR)/switch_pm.asm | $(BIN_DIR)
 	nasm $< -f bin -o $@ -I$(BOOT_DIR)/
 
 $(BIN_DIR)/os.bin: $(BIN_DIR)/mbr.bin $(BIN_DIR)/kernel.bin | $(BIN_DIR)
