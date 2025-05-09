@@ -30,7 +30,7 @@ $(BIN_DIR)/os.bin: $(BIN_DIR)/mbr.bin $(BIN_DIR)/kernel.bin | $(BIN_DIR)
 	cat $^ > $@
 
 run: $(BIN_DIR)/os.bin
-	qemu-system-i386 -display curses -hda  $<
+	qemu-system-i386 -hda  $<
 
 clean:
 	$(RM) $(BIN_DIR)/*.bin $(BUILD_DIR)/*.o *.bin *.o *.dis
