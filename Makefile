@@ -2,7 +2,7 @@ TARGET      := x86
 BIN_DIR     := targets/$(TARGET)/bin
 BUILD_DIR   := targets/$(TARGET)/build
 SOURCE_DIR  := src
-BOOT_DIR    := $(SOURCE_DIR)/bootloader
+BOOT_DIR    := $(SOURCE_DIR)/boot
 OS_DIR      := $(SOURCE_DIR)/os
 
 all: $(BIN_DIR)/os.bin
