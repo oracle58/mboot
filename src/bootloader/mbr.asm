@@ -11,11 +11,7 @@
 [bits 16]
 [org 0x7c00]              ; Set origin to 0x7c00, where BIOS loads the MBR
 
-;-------------------------------------------------------------------------------
-; KERNEL_OFFSET
-; Memory address where the kernel is loaded (0x1000).
-;-------------------------------------------------------------------------------
-KERNEL_OFFSET equ 0x1000
+KERNEL_OFFSET equ 0x1000  ; Memory address where the kernel is loaded (0x1000).
 
 ; BIOS sets boot drive in 'dl'; store for later use
 mov [BOOT_DRIVE], dl      ; Save boot drive number provided by BIOS in dl
@@ -63,9 +59,5 @@ BEGIN_32BIT:
 ;-------------------------------------------------------------------------------
 BOOT_DRIVE db 0
 
-;-------------------------------------------------------------------------------
-; Padding and boot signature
-; Pads the remaining space to 510 bytes and adds the bootable magic number 0xAA55.
-;-------------------------------------------------------------------------------
 times 510 - ($-$$) db 0   ; Pad with zeros up to 510 bytes
 dw 0xaa55                 ; Boot sector magic number
