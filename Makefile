@@ -1,4 +1,4 @@
-TARGET      := i386
+TARGET      := x86
 BIN_DIR     := targets/$(TARGET)/bin
 BUILD_DIR   := targets/$(TARGET)/build
 SOURCE_DIR  := src
@@ -36,8 +36,3 @@ clean:
 	$(RM) $(BIN_DIR)/*.bin $(BUILD_DIR)/*.o *.bin *.o *.dis
 
 .PHONY: all run clean
-
-# ---- Notes ----
-# $@ = target file
-# $< = first dependency
-# $^ = all dependencies
