@@ -3,7 +3,7 @@ BIN_DIR     := targets/$(TARGET)/bin
 BUILD_DIR   := targets/$(TARGET)/build
 SOURCE_DIR  := src
 BOOT_DIR    := $(SOURCE_DIR)/boot
-OS_DIR      := $(SOURCE_DIR)/os
+KERNEL_DIR      := $(SOURCE_DIR)/kernel
 
 all: $(BIN_DIR)/os.bin
 
@@ -17,10 +17,10 @@ $(BIN_DIR)/kernel.bin: $(BUILD_DIR)/kernel_entry.o $(BUILD_DIR)/kernel.o $(BUILD
 $(BUILD_DIR)/kernel_entry.o: $(BOOT_DIR)/kernel_entry.asm | $(BUILD_DIR)
 	nasm $< -f elf -o $@
 
-$(BUILD_DIR)/kernel.o: $(OS_DIR)/kernel.c | $(BUILD_DIR)
+$(BUILD_DIR)/kernel.o: $(KERNEL_DIR)/kernel.c | $(BUILD_DIR)
 	gcc -m32 -O0 -g -ffreestanding -fno-pic -fno-pie -nostdlib -nostartfiles -nodefaultlibs -c $< -o $@
 
-$(BUILD_DIR)/vga.o: $(OS_DIR)/vga.c $(OS_DIR)/vga.h | $(BUILD_DIR)
+$(BUILD_DIR)/vga.o: $(KERNEL_DIR)/vga.c $(KERNEL_DIR)/vga.h | $(BUILD_DIR)
 	gcc -m32 -O0 -g -ffreestanding -fno-pic -fno-pie -nostdlib -nostartfiles -nodefaultlibs -c $< -o $@
 
 $(BIN_DIR)/mbr.bin: $(BOOT_DIR)/mbr.asm $(BOOT_DIR)/disk_load.asm $(BOOT_DIR)/gdt.asm $(BOOT_DIR)/switch_pm.asm | $(BIN_DIR)
