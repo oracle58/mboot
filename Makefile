@@ -3,7 +3,7 @@ BIN_DIR     := targets/$(TARGET)/bin
 BUILD_DIR   := targets/$(TARGET)/build
 SOURCE_DIR  := src
 BOOT_DIR    := $(SOURCE_DIR)/boot
-KERNEL_DIR      := $(SOURCE_DIR)/kernel
+KERNEL_DIR  := $(SOURCE_DIR)/kernel
 
 all: $(BIN_DIR)/os.bin
 
