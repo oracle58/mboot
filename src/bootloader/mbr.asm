@@ -1,7 +1,7 @@
 ;-------------------------------------------------------------------------------
 ; @file mbr.asm
 ; @brief Master Boot Record (MBR) bootloader for loading and starting a kernel.
-; This module implements a 16-bit bootloader that runs from the MBR at 0x7c00.
+; 16-bit bootloader that runs from the MBR at 0x7c00.
 ; It loads a kernel from disk into memory, switches to 32-bit protected mode,
 ; and transfers control to the kernel. The bootloader is designed to fit within
 ; the 512-byte MBR, including the magic number 0xAA55.
