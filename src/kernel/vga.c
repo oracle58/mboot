@@ -1,10 +1,10 @@
 /**
  * @file vga.c
- * @brief VGA text mode driver for basic terminal output.
+ * @brief VGA text mode interface for basic terminal output.
  * @author Oliver Fohrmann
  * @date 09-may-2025
  *
- * This module provides functionality for interacting with a VGA text mode display
+ * Provides functionality for interacting with a VGA text mode display
  * in an 80x25 character grid. It supports initializing the screen, writing individual
  * characters, and printing strings with specified colors. The VGA memory is directly
  * accessed at 0xB8000, and global cursor position tracking is maintained.
